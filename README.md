@@ -19,7 +19,7 @@ I'll work on making progress during my breaks, though, unfortunately, the time n
 ## 2. Bot Basic Ability
 
 - interactive action
-- akf message box
+- afk message box
 - message command
 - conversation log
 - ... and other
@@ -30,4 +30,7 @@ I'll work on making progress during my breaks, though, unfortunately, the time n
 - LLM conversation & command understand
 - ... and other
 
+# Overall architecture
 
+
+![](assets/20241121_234954_blueprint.svg)
