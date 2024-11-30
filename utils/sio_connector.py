@@ -3,9 +3,10 @@ import asyncio
 from typing import Callable, Dict, Any
 
 class SIOConnector:
-    def __init__(self):
-        self.sio = socketio.AsyncClient()
+    def __init__(self, debug: bool = False):
+        self.sio = socketio.AsyncClient(logger=debug, engineio_logger=debug)
         self.event_handlers: Dict[str, Callable] = {}
+        self.debug = debug
         self._setup_default_handlers()
     
     def _setup_default_handlers(self):

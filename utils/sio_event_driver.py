@@ -4,7 +4,7 @@ from asyncio import Event, Lock
 from queue import Queue
 from threading import Thread
 
-from sio_connector import SIOConnector
+from utils.sio_connector import SIOConnector
 
 class SubscribeToken:
     def __init__(self, events: List[str], dispatcher: 'SIOEventDriver'):
@@ -73,15 +73,15 @@ class SIOEventDriver:
 
     def _start_daemon_loop(self):
         ''' Prevent thread contention on event_flag, which may delay consumption '''
-        def daemon_loop():
+        async def daemon_loop():
             while not self._stop_event.is_set():
                 ''' No lock, just wait next round '''
                 for token in self.tokens:
                     if not token.event_queue.empty() and not token.event_flag.is_set():
                         token.event_flag.set()
-                asyncio.sleep(0.1)
-        thread = Thread(target=daemon_loop, daemon=True)
-        thread.start()
+                await asyncio.sleep(0.1)
+        loop = asyncio.get_event_loop()
+        loop.create_task(daemon_loop())
 
     def stop(self):
         self._stop_event.set()
