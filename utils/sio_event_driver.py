@@ -6,6 +6,11 @@ from threading import Thread
 
 from utils.sio_connector import SIOConnector
 
+class SIOEvent:
+    def __init__(self, event_name: str, data: Any):
+        self.event_name = event_name
+        self.data = data
+
 class SubscribeToken:
     def __init__(self, events: List[str], dispatcher: 'SIOEventDriver'):
         self.events = events
@@ -13,7 +18,7 @@ class SubscribeToken:
         self.event_queue: Queue = Queue()
         self.event_flag: Event = Event()
 
-    async def wait_event(self) -> List[Any]:
+    async def wait_event(self) -> List[SIOEvent]:
         await self.event_flag.wait()
         data_list = []
         while not self.event_queue.empty():
@@ -21,8 +26,8 @@ class SubscribeToken:
         self.event_flag.clear()
         return data_list
 
-    def push_event(self, data: Any):
-        self.event_queue.put(data)
+    def push_event(self, event: SIOEvent):
+        self.event_queue.put(event)
         self.event_flag.set()
 
     def unsubscribe(self):
@@ -43,8 +48,9 @@ class SIOEventDriver:
     def _create_event_handler(self, event: str):
         async def handler(event_name: str, data: Any):
             try:
-                for token in self._get_tokens_for_event(event_name):
-                    token.push_event(data)
+                sio_event = SIOEvent(event_name, data)
+                for token in await self._get_tokens_for_event(event_name):
+                    token.push_event(sio_event)
             except Exception as e:
                 print(f"Error handling event {event_name}: {e}")
         return handler
