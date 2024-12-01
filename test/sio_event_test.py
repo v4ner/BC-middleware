@@ -16,7 +16,6 @@ class TestSIOEventDriver(unittest.IsolatedAsyncioTestCase):
         await self.connector.disconnect()
 
     async def test_subscribe_and_push_event(self):
-        # Subscribe to a test event
         token = await self.driver.subscribe(["*"])
 
         # Delay login request
