@@ -2,7 +2,6 @@ import asyncio
 from typing import Any, List
 from asyncio import Event, Lock
 from queue import Queue
-from threading import Thread
 
 from utils.sio_connector import SIOConnector
 
@@ -43,9 +42,6 @@ class SIOEventDriver:
         self._start_daemon_loop()
 
     def _setup_event_forwarding(self):
-        self.connector.register_handler('*', self._create_event_handler('*'))
-
-    def _create_event_handler(self, event: str):
         async def handler(event_name: str, data: Any):
             try:
                 sio_event = SIOEvent(event_name, data)
@@ -53,7 +49,7 @@ class SIOEventDriver:
                     token.push_event(sio_event)
             except Exception as e:
                 print(f"Error handling event {event_name}: {e}")
-        return handler
+        self.connector.register_handler('*', handler)
 
     async def subscribe(self, events: List[str]) -> SubscribeToken:        
         token = SubscribeToken(events, self)
